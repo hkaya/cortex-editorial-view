@@ -2,7 +2,7 @@
   "name": "cortex-editorial-view",
   "version": "1.0.0",
   "description": "Editorial content view for Cortex applications",
-  "main": "index.js",
+  "main": "./lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,5 +15,14 @@
   "bugs": {
     "url": "https://github.com/hkaya/cortex-editorial-view/issues"
   },
-  "homepage": "https://github.com/hkaya/cortex-editorial-view#readme"
+  "homepage": "https://github.com/hkaya/cortex-editorial-view#readme",
+  "devDependencies": {
+    "coffee-script": "^1.9.2",
+    "gulp": "^3.8.11",
+    "gulp-coffee": "^2.3.1"
+  },
+  "dependencies": {
+    "jquery": "^2.1.4",
+    "promise": "^7.0.1"
+  }
 }
