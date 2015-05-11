@@ -1,0 +1,19 @@
+{
+  "name": "cortex-editorial-view",
+  "version": "1.0.0",
+  "description": "Editorial content view for Cortex applications",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hkaya/cortex-editorial-view.git"
+  },
+  "author": "Hamza Kaya <hamza@cortexpowered.com> (http://www.cortexpowered.com/)",
+  "license": "GPLv2",
+  "bugs": {
+    "url": "https://github.com/hkaya/cortex-editorial-view/issues"
+  },
+  "homepage": "https://github.com/hkaya/cortex-editorial-view#readme"
+}
