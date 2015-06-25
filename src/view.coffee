@@ -29,8 +29,8 @@ class EditorialView
 
   render: (img) ->
     """
-    <div class="editorial"
-      style="background: url(#{img}) no-repeat center center fixed;">
+    <div style="background: url(#{img}) no-repeat center center local;"
+      class="editorial">
     </div>
     """
 

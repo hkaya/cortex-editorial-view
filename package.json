@@ -1,6 +1,6 @@
 {
   "name": "cortex-editorial-view",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Editorial content view for Cortex applications",
   "main": "./lib/index.js",
   "scripts": {
