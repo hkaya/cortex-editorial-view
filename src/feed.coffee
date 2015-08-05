@@ -1,11 +1,14 @@
-promise   = require 'promise'
-$         = require 'jquery'
+promise = require 'promise'
+$       = require 'jquery'
 
 CortexNet = window?.Cortex?.net
 
+
 class EditorialFeed
+
   constructor: (@feedXml, opts) ->
     opts ?= {}
+    @_requestThrottleMs = 1000
     @assetCacheTTL = 7 * 24 * 60 * 60 * 1000
     if opts.assetCacheTTL?
       @assetCacheTTL = opts.assetCacheTTL
@@ -19,25 +22,16 @@ class EditorialFeed
       @feedCachePeriod = opts.feedCachePeriod
 
     @imageIndex = 0
-    @cacheIndex = 1
     @images = []
 
-    fetch = =>
-      @fetch()
-    setInterval(fetch, @feedCachePeriod)
-
+    setInterval(@fetch, @feedCachePeriod)
     @fetch()
 
   get: ->
-    console.log "EditorialFeed will return on of the #{@images.length} images in #{@feedXml}"
-    new promise (resolve, reject) =>
-      image = @_selectImage()
-      if image?
-        @_cache(image).then(resolve).catch(reject)
-      else
-        reject new Error "No editorial content is available."
+    console.log "EditorialFeed will return one of the #{@images.length} images in #{@feedXml}"
+    @_selectImage()
 
-  fetch: ->
+  fetch: =>
     console.log "About to start a new Editorial Content fetch url = #{@feedXml}"
     new promise (resolve, reject) =>
       opts =
@@ -52,19 +46,26 @@ class EditorialFeed
           (file) =>
             $.get(file, (
               (data) =>
-                images = @_parse data
-                if images? and images.length > 0
-                  console.log "Replacing images #{@images.length} -> #{images.length}"
-                  @images = images
+                imageUrls = @_parse data
+                if imageUrls? and imageUrls.length > 0
+                  console.log "Replacing images #{@images.length} -> #{imageUrls.length}"
+                  promises = (@_cache(url, i * @_requestThrottleMs) for url, i in imageUrls)
+                  promise.all(promises)
+                    .then (res) =>
+                      @images = res
+                    .catch (e) -> console.error e
+                    .done()
 
                 resolve()
               )
-            ).fail((e) ->
+            ).fail((e) =>
+              @images = []
               console.log "Failed to fetch local editorial feed. e=", e
               reject e
             )
         ), (
-          (e) ->
+          (e) =>
+            @images = []
             console.log "Failed to fetch remote editorial feed. e=", e
             reject e
         )
@@ -96,7 +97,7 @@ class EditorialFeed
 
     image
 
-  _cache: (image) ->
+  _cache: (image, wait=0) =>
     new promise (resolve, reject) =>
       if CortexNet?
         opts =
@@ -105,17 +106,21 @@ class EditorialFeed
             ttl: @assetCacheTTL
           stripBom: false
           retry: 3
-        CortexNet.download image, opts, (
-          (path) =>
-            console.log "Cached image #{image} => #{path}"
-            resolve path
-        ), (
-          (err) =>
-            console.log "Failed to cache image #{image}, err=", err
-            reject err
-        )
+
+        error = (e) ->
+          console.log "Failed to cache image #{image}, err=", err
+          reject err
+
+        success = (path) ->
+          console.log "Cached image #{image} => #{path}"
+          resolve path
+
+        fetch = ->
+          CortexNet.download image, opts, success, error
+        setTimeout fetch, wait
       else
         console.log "Cortex network is not available. "
         resolve image
+
 
 module.exports = EditorialFeed
