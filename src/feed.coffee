@@ -3,7 +3,9 @@ $         = require 'jquery'
 
 CortexNet = window?.Cortex?.net
 
+
 class EditorialFeed
+
   constructor: (@feedXml, opts) ->
     opts ?= {}
     @assetCacheTTL = 7 * 24 * 60 * 60 * 1000
@@ -19,25 +21,16 @@ class EditorialFeed
       @feedCachePeriod = opts.feedCachePeriod
 
     @imageIndex = 0
-    @cacheIndex = 1
     @images = []
 
-    fetch = =>
-      @fetch()
-    setInterval(fetch, @feedCachePeriod)
-
+    setInterval(@fetch, @feedCachePeriod)
     @fetch()
 
   get: ->
-    console.log "EditorialFeed will return on of the #{@images.length} images in #{@feedXml}"
-    new promise (resolve, reject) =>
-      image = @_selectImage()
-      if image?
-        @_cache(image).then(resolve).catch(reject)
-      else
-        reject new Error "No editorial content is available."
+    console.log "EditorialFeed will return one of the #{@images.length} images in #{@feedXml}"
+    @_selectImage()
 
-  fetch: ->
+  fetch: =>
     console.log "About to start a new Editorial Content fetch url = #{@feedXml}"
     new promise (resolve, reject) =>
       opts =
@@ -52,19 +45,24 @@ class EditorialFeed
           (file) =>
             $.get(file, (
               (data) =>
-                images = @_parse data
-                if images? and images.length > 0
-                  console.log "Replacing images #{@images.length} -> #{images.length}"
-                  @images = images
+                imageUrls = @_parse data
+                if imageUrls? and imageUrls.length > 0
+                  console.log "Replacing images #{@images.length} -> #{imageUrls.length}"
+                  promises = (@_cache(url) for url in imageUrls)
+                  promise.all(promises)
+                    .then (res) => @images = res
+                    .done()
 
                 resolve()
               )
-            ).fail((e) ->
+            ).fail((e) =>
+              @images = []
               console.log "Failed to fetch local editorial feed. e=", e
               reject e
             )
         ), (
-          (e) ->
+          (e) =>
+            @images = []
             console.log "Failed to fetch remote editorial feed. e=", e
             reject e
         )
@@ -117,5 +115,6 @@ class EditorialFeed
       else
         console.log "Cortex network is not available. "
         resolve image
+
 
 module.exports = EditorialFeed
