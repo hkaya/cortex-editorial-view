@@ -29,7 +29,8 @@ class EditorialFeed
 
   get: ->
     console.log "EditorialFeed will return one of the #{@images.length} images in #{@feedXml}"
-    @_selectImage()
+    new promise (resolve, reject) =>
+      resolve @_selectImage()
 
   fetch: =>
     console.log "About to start a new Editorial Content fetch url = #{@feedXml}"
