@@ -26,6 +26,8 @@ class EditorialView
         begin: =>
           @run()
       CortexView.submitView @constructor.name, @render(image), @displayTime, callbacks
+    else
+      onerror new Error("No editorial image found.")
 
   render: (img) ->
     """
