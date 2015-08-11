@@ -19,13 +19,13 @@ class EditorialView
         @run()
       setTimeout run, 1000
 
-    @feed.get().then (image) =>
+    image = @feed.get()
+    if image?
       callbacks =
         error: onerror
         begin: =>
           @run()
       CortexView.submitView @constructor.name, @render(image), @displayTime, callbacks
-    .catch onerror
 
   render: (img) ->
     """
